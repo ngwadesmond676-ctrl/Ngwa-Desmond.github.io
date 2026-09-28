@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trinity Hospital Management System</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
+.app{display:flex;min-height:100vh}.side{width:240px;background:#123b5d;color:#fff;padding:20px;position:fixed;inset:0 auto 0 0}
+.logo{font-size:22px;font-weight:700;margin-bottom:5px}.sub{font-size:12px;opacity:.75;margin-bottom:25px}
+.nav button{display:block;width:100%;padding:12px;margin:5px 0;border:0;border-radius:8px;background:transparent;color:#fff;text-align:left;cursor:pointer}
+.nav button.active,.nav button:hover{background:#1d628f}.main{margin-left:240px;padding:24px;width:calc(100% - 240px)}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.top h1{margin:0;font-size:26px}.user{background:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 2px 8px #0001}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.card{background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px #0000000d}.label{font-size:13px;color:#697586}.num{font-size:28px;font-weight:700;margin-top:8px}
+.section{margin-top:20px;background:#fff;border-radius:12px;padding:18px;box-shadow:0 2px 10px #0000000d}.section h2{margin-top:0;font-size:18px}
+table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid #eee;text-align:left;font-size:14px}th{color:#667085}
+button.primary{background:#1677b8;color:#fff;border:0;padding:10px 15px;border-radius:7px;cursor:pointer}
+input,select{padding:10px;border:1px solid #ccd3dc;border-radius:7px;width:100%;margin:5px 0}
+.form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.hidden{display:none}
+@media(max-width:800px){.side{width:190px}.main{margin-left:190px;width:calc(100% - 190px)}.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.side{position:relative;width:100%;height:auto}.app{display:block}.main{margin:0;width:100%}.cards,.form{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="logo">TRINITY HOSPITAL</div><div class="sub">Nguila Management System</div>
+  <div class="nav">
+    <button class="active" onclick="show('dashboard',this)">📊 Dashboard</button>
+    <button onclick="show('patients',this)">👥 Patients</button>
+    <button onclick="show('lab',this)">🧪 Laboratory</button>
+    <button onclick="show('pharmacy',this)">💊 Pharmacy</button>
+    <button onclick="show('finance',this)">💰 Finance</button>
+    <button onclick="show('staff',this)">👨‍⚕️ Staff</button>
+    <button onclick="show('theatre',this)">🏥 Theatre</button>
+    <button onclick="show('admission',this)">🛏️ Admission/Beds</button>
+  </div>
+</aside>
+<main class="main">
+<header class="top"><h1 id="title">Dashboard</h1><div class="user">👤 Administrator</div></header>
+
+<section id="dashboard">
+<div class="cards">
+<div class="card"><div class="label">Patients Today</div><div class="num" id="patientsCount">0</div></div>
+<div class="card"><div class="label">Admissions</div><div class="num">0</div></div>
+<div class="card"><div class="label">Lab Tests</div><div class="num" id="labCount">0</div></div>
+<div class="card"><div class="label">Theatre Cases</div><div class="num">0</div></div>
+</div>
+<div class="section"><h2>Management Overview</h2>
+<table><tr><th>Indicator</th><th>Value</th></tr>
+<tr><td>Today's revenue</td><td id="revenue">0 FCFA</td></tr>
+<tr><td>Today's expenses</td><td id="expenses">0 FCFA</td></tr>
+<tr><td>Outstanding debts</td><td>0 FCFA</td></tr>
+<tr><td>Available beds</td><td>—</td></tr></table></div>
+</section>
+
+<section id="patients" class="hidden"><div class="section"><h2>Patient Registration</h2>
+<div class="form"><input id="pname" placeholder="Patient name"><input id="page" placeholder="Age"><select id="psex"><option>Male</option><option>Female</option><option>Other</option></select><input id="pcontact" placeholder="Phone/contact"></div>
+<button class="primary" onclick="addPatient()">Register Patient</button></div>
+<div class="section"><h2>Patients</h2><table><thead><tr><th>ID</th><th>Name</th><th>Age</th><th>Sex</th><th>Contact</th></tr></thead><tbody id="patientsTable"></tbody></table></div></section>
+
+<section id="lab" class="hidden"><div class="section"><h2>Laboratory</h2>
+<div class="form"><input id="testPatient" placeholder="Patient name"><input id="testName" placeholder="Test (e.g. FBC, ALT, Creatinine)"><input id="testResult" placeholder="Result"><input id="testCost" type="number" placeholder="Cost (FCFA)"></div>
+<button class="primary" onclick="addLab()">Save Lab Test</button></div>
+<div class="section"><table><thead><tr><th>Patient</th><th>Test</th><th>Result</th><th>Cost</th></tr></thead><tbody id="labTable"></tbody></table></div></section>
+
+<section id="pharmacy" class="hidden"><div class="section"><h2>Pharmacy Stock</h2>
+<div class="form"><input id="drug" placeholder="Drug name"><input id="qty" type="number" placeholder="Quantity"><input id="price" type="number" placeholder="Unit price (FCFA)"><input id="expiry" type="date"></div>
+<button class="primary" onclick="addDrug()">Add Stock</button></div>
+<div class="section"><table><thead><tr><th>Drug</th><th>Qty</th><th>Unit Price</th><th>Expiry</th></tr></thead><tbody id="drugTable"></tbody></table></div></section>
+
+<section id="finance" class="hidden"><div class="section"><h2>Finance</h2>
+<div class="form"><input id="fdesc" placeholder="Description"><select id="ftype"><option value="income">Income</option><option value="expense">Expense</option></select><input id="famount" type="number" placeholder="Amount (FCFA)"></div>
+<button class="primary" onclick="addFinance()">Record Transaction</button></div>
+<div class="section"><table><thead><tr><th>Description</th><th>Type</th><th>Amount</th></tr></thead><tbody id="financeTable"></tbody></table></div></section>
+
+<section id="staff" class="hidden"><div class="section"><h2>Staff</h2>
+<div class="form"><input id="sname" placeholder="Staff name"><input id="srole" placeholder="Role"><select id="sshift"><option>Morning</option><option>Evening</option><option>Night</option><option>Off</option></select></div>
+<button class="primary" onclick="addStaff()">Add Staff</button></div>
+<div class="section"><table><thead><tr><th>Name</th><th>Role</th><th>Shift</th></tr></thead><tbody id="staffTable"></tbody></table></div></section>
+
+<section id="theatre" class="hidden"><div class="section"><h2>Theatre Cases</h2>
+<div class="form"><input id="tpatient" placeholder="Patient name"><input id="tprocedure" placeholder="Procedure"><input id="tsurgeon" placeholder="Surgeon"><input id="tdate" type="date"></div>
+<button class="primary" onclick="addTheatre()">Schedule Case</button></div>
+<div class="section"><table><thead><tr><th>Patient</th><th>Procedure</th><th>Surgeon</th><th>Date</th></tr></thead><tbody id="theatreTable"></tbody></table></div></section>
+
+<section id="admission" class="hidden"><div class="section"><h2>Admission & Beds</h2>
+<div class="form"><input id="apatient" placeholder="Patient name"><input id="abed" placeholder="Bed number"><input id="adiag" placeholder="Diagnosis"><input id="adate" type="date"></div>
+<button class="primary" onclick="addAdmission()">Admit Patient</button></div>
+<div class="section"><table><thead><tr><th>Patient</th><th>Bed</th><th>Diagnosis</th><th>Date</th></tr></thead><tbody id="admissionTable"></tbody></table></div></section>
+</main></div>
+<script>
+const data={patients:[],lab:[],drugs:[],finance:[],staff:[],theatre:[],admission:[]};
+function save(){localStorage.trinity=JSON.stringify(data);render()}
+function load(){if(localStorage.trinity)Object.assign(data,JSON.parse(localStorage.trinity));render()}
+function show(id,btn){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.getElementById('title').textContent=btn.textContent.replace(/^.. /,'');document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+function row(id,arr){document.getElementById(id).innerHTML=arr.map(x=>'<tr>'+x.map(v=>'<td>'+String(v??'').replace(/[<>]/g,'')+'</td>').join('')+'</tr>').join('')}
+function addPatient(){let n=pname.value.trim();if(!n)return;data.patients.push([Date.now().toString().slice(-6),n,page.value,psex.value,pcontact.value]);save();pname.value=page.value=pcontact.value=''}
+function addLab(){if(!testPatient.value||!testName.value)return;data.lab.push([testPatient.value,testName.value,testResult.value,testCost.value+' FCFA']);save()}
+function addDrug(){if(!drug.value)return;data.drugs.push([drug.value,qty.value,price.value+' FCFA',expiry.value]);save()}
+function addFinance(){if(!fdesc.value||!famount.value)return;data.finance.push([fdesc.value,ftype.value,famount.value+' FCFA']);save()}
+function addStaff(){if(!sname.value)return;data.staff.push([sname.value,srole.value,sshift.value]);save()}
+function addTheatre(){if(!tpatient.value)return;data.theatre.push([tpatient.value,tprocedure.value,tsurgeon.value,tdate.value]);save()}
+function addAdmission(){if(!apatient.value)return;data.admission.push([apatient.value,abed.value,adiag.value,adate.value]);save()}
+function render(){
+ row('patientsTable',data.patients);row('labTable',data.lab);row('drugTable',data.drugs);row('financeTable',data.finance);row('staffTable',data.staff);row('theatreTable',data.theatre);row('admissionTable',data.admission);
+ patientsCount.textContent=data.patients.length;labCount.textContent=data.lab.length;
+ let inc=0,exp=0;data.finance.forEach(x=>x[1]=='income'?inc+=+x[2].split(' ')[0]:exp+=+x[2].split(' ')[0]);revenue.textContent=inc.toLocaleString()+' FCFA';expenses.textContent=exp.toLocaleString()+' FCFA';
+}
+load();
+</script>
+</body></html>
